@@ -191,7 +191,18 @@ function App() {
     const { data: listener } = client.auth.onAuthStateChange((event, session) => {
       if (active) {
         setUser(session?.user ?? null)
-        if (!session?.user) setAccountRole(null)
+        if (!session?.user) {
+          setAccountRole(null)
+          setProfile(null)
+          setProjects([])
+          setApplications([])
+          setView('home')
+          setShowAuth(false)
+          setShowProfile(false)
+          setShowPassword(false)
+          setShowPublish(false)
+          setShowApplicantsFor(null)
+        }
         if (event === 'PASSWORD_RECOVERY') {
           setAuthError('')
           setAuthMessage('')
@@ -353,6 +364,17 @@ function App() {
     }
     setUser(null)
     setAccountRole(null)
+    setProfile(null)
+    setProjects([])
+    setApplications([])
+    setView('home')
+    setShowAuth(false)
+    setShowProfile(false)
+    setShowPassword(false)
+    setShowPublish(false)
+    setShowApplicantsFor(null)
+    setAuthError('')
+    setAuthMessage('')
   }
 
   async function applyToProject(id: number) {
@@ -373,7 +395,11 @@ function App() {
       } catch (error) {
         if (errorCode(error) === '23505') {
           setAuthError('You already applied to this project. Your status has been refreshed.')
-          await refreshRemoteData('student')
+          try {
+            await refreshRemoteData('student')
+          } catch (refreshError) {
+            console.error('Unable to refresh the existing application.', refreshError)
+          }
         } else {
           console.error('Unable to submit the application.', error)
           setAuthError('This application could not be submitted. Please try again.')
