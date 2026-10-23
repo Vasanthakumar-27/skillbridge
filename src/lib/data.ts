@@ -1,22 +1,34 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ApplicationStatus, Application, Profile, Project } from './types'
 
+type RemoteRelation<T> = T | T[] | null
+
+type RemoteProfile = {
+  full_name: string
+  bio: string | null
+  skills: string[] | null
+  education: string | null
+  github: string | null
+  linkedin: string | null
+  resume_path: string | null
+  resume_name: string | null
+}
+
+type RemoteProjectDetails = {
+  title: string
+  description: string
+  duration: string
+  skills: string[]
+  profiles: RemoteRelation<Pick<RemoteProfile, 'full_name'>>
+}
+
 type RemoteProject = {
   id: string
   title: string
   description: string
   skills: string[]
   duration: string
-  profiles: {
-    full_name: string
-    bio: string | null
-    skills: string[] | null
-    education: string | null
-    github: string | null
-    linkedin: string | null
-    resume_path: string | null
-    resume_name: string | null
-  }[] | null
+  profiles: RemoteRelation<RemoteProfile>
   applications?: { count: number }[]
   status?: 'live' | 'closed'
   industry?: string
@@ -34,31 +46,20 @@ type RemoteApplication = {
   project_id: string
   status: ApplicationStatus
   created_at: string
-  profiles: {
-    full_name: string
-    bio: string | null
-    skills: string[] | null
-    education: string | null
-    github: string | null
-    linkedin: string | null
-    resume_path: string | null
-    resume_name: string | null
-  }[] | null
-  projects: {
-    title: string
-    description: string
-    duration: string
-    skills: string[]
-    profiles: { full_name: string }[] | null
-  }[] | null
+  profiles: RemoteRelation<RemoteProfile>
+  projects: RemoteRelation<RemoteProjectDetails>
 }
 
 function isSchemaCompatibilityError(error: { code?: string } | null) {
   return Boolean(error && ['42703', '42P01', 'PGRST200', 'PGRST205'].includes(error.code ?? ''))
 }
 
-function profileName(profiles: { full_name: string }[] | null) {
-  return profiles?.[0]?.full_name || 'SkillBridge business'
+function firstRelation<T>(relation: RemoteRelation<T>) {
+  return Array.isArray(relation) ? relation[0] : relation
+}
+
+function profileName(profiles: RemoteRelation<Pick<RemoteProfile, 'full_name'>>) {
+  return firstRelation(profiles)?.full_name || 'SkillBridge business'
 }
 
 function numericId(value: string) {
@@ -86,25 +87,26 @@ export function mapRemoteProject(project: RemoteProject): Project {
 }
 
 export function mapRemoteApplication(application: RemoteApplication): Application | null {
-  const project = application.projects?.[0]
+  const project = firstRelation(application.projects)
   if (!project) return null
+  const profile = firstRelation(application.profiles)
   return {
     id: numericId(application.id),
     remoteId: application.id,
     projectId: numericId(application.project_id),
     remoteProjectId: application.project_id,
-    studentName: application.profiles?.[0]?.full_name || 'Student',
-    studentInitials: (application.profiles?.[0]?.full_name || 'Student').slice(0, 2).toUpperCase(),
+    studentName: profile?.full_name || 'Student',
+    studentInitials: (profile?.full_name || 'Student').slice(0, 2).toUpperCase(),
     submittedAt: application.created_at,
     status: application.status,
-    studentProfile: application.profiles?.[0] ? {
-      bio: application.profiles[0].bio ?? '',
-      skills: application.profiles[0].skills ?? [],
-      education: application.profiles[0].education ?? '',
-      github: application.profiles[0].github ?? '',
-      linkedin: application.profiles[0].linkedin ?? '',
-      resumePath: application.profiles[0].resume_path ?? '',
-      resumeName: application.profiles[0].resume_name ?? '',
+    studentProfile: profile ? {
+      bio: profile.bio ?? '',
+      skills: profile.skills ?? [],
+      education: profile.education ?? '',
+      github: profile.github ?? '',
+      linkedin: profile.linkedin ?? '',
+      resumePath: profile.resume_path ?? '',
+      resumeName: profile.resume_name ?? '',
     } : undefined,
   }
 }

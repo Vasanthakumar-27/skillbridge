@@ -381,8 +381,14 @@ function App() {
         setIsLoading(false)
         return
       }
-      await refreshRemoteData('student')
-      setIsLoading(false)
+      try {
+        await refreshRemoteData('student')
+      } catch (error) {
+        console.error('Application was submitted but the student view could not refresh.', error)
+        setAuthError('Your application was submitted. Refresh the page to see it marked as Applied.')
+      } finally {
+        setIsLoading(false)
+      }
       return
     }
     const studentName = user?.user_metadata.full_name || 'Alex Morgan'
@@ -543,6 +549,7 @@ function App() {
       setApplicantsLoading(true)
       refreshRemoteData('employer').catch((error) => {
         console.error('Unable to refresh applicants.', error)
+        setAuthError('Applicants could not be refreshed. Please try again.')
       }).finally(() => {
         setApplicantsLoading(false)
       })
