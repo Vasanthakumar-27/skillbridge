@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { ApplicationStatus, Application, Profile, Project } from './types'
+import type { ApplicationStatus, Application, Message, Profile, Project } from './types'
 
 type RemoteRelation<T> = T | T[] | null
 
@@ -15,6 +15,8 @@ type RemoteProfile = {
 }
 
 type RemoteProjectDetails = {
+  id: string
+  employer_id?: string
   title: string
   description: string
   duration: string
@@ -44,6 +46,7 @@ const legacyApplicationSelect = 'id, project_id, status, created_at, profiles!ap
 type RemoteApplication = {
   id: string
   project_id: string
+  student_id: string
   status: ApplicationStatus
   created_at: string
   profiles: RemoteRelation<RemoteProfile>
@@ -95,6 +98,8 @@ export function mapRemoteApplication(application: RemoteApplication): Applicatio
     remoteId: application.id,
     projectId: numericId(application.project_id),
     remoteProjectId: application.project_id,
+    studentRemoteId: application.student_id,
+    employerRemoteId: project.employer_id,
     studentName: profile?.full_name || 'Student',
     studentInitials: (profile?.full_name || 'Student').slice(0, 2).toUpperCase(),
     submittedAt: application.created_at,
@@ -132,7 +137,7 @@ export async function loadRemoteProjects(client: SupabaseClient, employerId?: st
 export async function loadRemoteApplications(client: SupabaseClient, userId?: string) {
   let query = client
     .from('applications')
-    .select('id, project_id, status, created_at, profiles!applications_student_id_fkey(full_name, bio, skills, education, github, linkedin, resume_path, resume_name), projects(title, description, duration, skills, profiles!projects_employer_id_fkey(full_name))')
+    .select('id, project_id, student_id, status, created_at, profiles!applications_student_id_fkey(full_name, bio, skills, education, github, linkedin, resume_path, resume_name), projects(id, employer_id, title, description, duration, skills, profiles!projects_employer_id_fkey(full_name))')
   if (userId) query = query.eq('student_id', userId)
   let { data, error } = await query.order('created_at', { ascending: false })
   if (isSchemaCompatibilityError(error)) {
@@ -271,5 +276,41 @@ export async function createResumeDownloadUrl(client: SupabaseClient, path: stri
 export async function updateRemoteApplicationStatus(client: SupabaseClient, application: Application, status: ApplicationStatus) {
   if (!application.remoteId) throw new Error('This application is local-only and cannot be updated remotely.')
   const { error } = await client.from('applications').update({ status }).eq('id', application.remoteId)
+  if (error) throw error
+}
+
+type RemoteMessage = {
+  id: string
+  application_id: string
+  sender_id: string
+  body: string
+  created_at: string
+  profiles: RemoteRelation<Pick<RemoteProfile, 'full_name'>>
+}
+
+export async function loadRemoteMessages(client: SupabaseClient, applicationId: string) {
+  const { data, error } = await client
+    .from('messages')
+    .select('id, application_id, sender_id, body, created_at, profiles!messages_sender_id_fkey(full_name)')
+    .eq('application_id', applicationId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data as unknown as RemoteMessage[]).map((message): Message => ({
+    id: message.id,
+    applicationId: message.application_id,
+    senderId: message.sender_id,
+    senderName: firstRelation(message.profiles)?.full_name || 'SkillBridge member',
+    body: message.body,
+    createdAt: message.created_at,
+  }))
+}
+
+export async function createRemoteMessage(client: SupabaseClient, applicationId: string, recipientId: string, senderId: string, body: string) {
+  const { error } = await client.from('messages').insert({
+    application_id: applicationId,
+    sender_id: senderId,
+    recipient_id: recipientId,
+    body,
+  })
   if (error) throw error
 }

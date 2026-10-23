@@ -35,9 +35,20 @@ export type Application = {
   remoteId?: string
   projectId: number
   remoteProjectId?: string
+  studentRemoteId?: string
+  employerRemoteId?: string
   studentName: string
   studentInitials: string
   submittedAt: string
   status: ApplicationStatus
   studentProfile?: Pick<Profile, 'bio' | 'skills' | 'education' | 'github' | 'linkedin' | 'resumePath' | 'resumeName'>
+}
+
+export type Message = {
+  id: string
+  applicationId: string
+  senderId: string
+  senderName: string
+  body: string
+  createdAt: string
 }

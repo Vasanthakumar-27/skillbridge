@@ -32,12 +32,17 @@ Instead, run these migrations in filename order:
 ```text
 20261021150000_profiles_and_project_management.sql
 20261022100000_production_hardening.sql
+20261023130000_application_messaging.sql
 ```
 
 They add editable profile fields, live/closed project status, applicant counts,
 owner-only project management, immutable account roles, indexes, and document
 cleanup policies. Editing a migration file does not rerun SQL on an already
 initialized Supabase project.
+
+The messaging migration adds private application-linked conversations. Run it
+after the hardening migration. Businesses and students can only read or send
+messages for applications in which they are participants.
 
 To confirm whether the initial schema is already present, run:
 
