@@ -262,12 +262,12 @@ function App() {
       setMobileNav(false)
       return
     }
-    if (backendStatus !== 'connected') {
-      setAuthError('The live backend is not ready yet. Apply the Supabase migrations, then refresh this page.')
-      setShowAuth(true)
-      return
-    }
     if (user) {
+      if (backendStatus !== 'connected') {
+        setAuthError('Your account is signed in, but the project database is still being prepared. Apply the Supabase migrations, then refresh this page.')
+        setShowAuth(true)
+        return
+      }
       if (userRole !== role) {
         setAuthError(`This account is registered as a ${userRole}. Sign out to switch access.`)
         setShowAuth(true)
