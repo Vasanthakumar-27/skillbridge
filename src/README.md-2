@@ -1,0 +1,149 @@
+# SkillBridge — Micro-Internship Exchange
+
+**Connecting student talent with real-world business opportunities.**
+
+SkillBridge is a web-based platform designed to connect students with small businesses through short-term technical projects. It helps students gain practical experience, build their portfolios, and improve their skills while enabling businesses to discover talented students for their project requirements.
+
+🌐 **Live Demo:** https://skillbridge-pied-five.vercel.app
+
+📂 **GitHub Repository:** https://github.com/Vasanthakumar-27/skillbridge
+
+## 📌 Problem Statement
+
+Students often struggle to find opportunities to apply their technical knowledge in real-world situations. At the same time, small businesses may find it difficult to access affordable technical talent for short-term projects.
+
+SkillBridge aims to bridge this gap by creating a platform where businesses can publish project opportunities and students can discover and apply for suitable projects.
+
+## 🎯 Objectives
+
+- Connect students with small businesses.
+- Provide opportunities to gain hands-on technical experience.
+- Help students build practical skills and portfolios.
+- Enable businesses to post projects and discover student talent.
+- Encourage collaboration between education and industry.
+
+## ✨ Key Features
+
+### For Students
+- Explore available projects.
+- Review project descriptions and requirements.
+- Find opportunities matching their skills.
+- Apply for suitable projects, where supported by the application.
+- Gain practical project experience.
+
+### For Businesses
+- Discover student talent.
+- Publish short-term project opportunities, where supported.
+- Describe project requirements and required skills.
+- Review student applications, where supported.
+
+### Platform
+- Web-based user interface.
+- Backend and database integration using Supabase.
+- Online deployment through Vercel.
+- Responsive interface for convenient access across devices.
+
+> Note: The exact features available depend on the current implementation of the application.
+
+## 🛠️ Technology Stack
+
+- **Frontend:** React and TypeScript
+- **Build Tool:** Vite
+- **Backend Services and Database:** Supabase
+- **Database:** PostgreSQL through Supabase
+- **Deployment:** Vercel
+- **Version Control:** Git and GitHub
+
+## 🏗️ System Architecture
+
+1. Users interact with the SkillBridge frontend through a web browser.
+2. The frontend communicates with Supabase services when required.
+3. Supabase provides database access and backend capabilities.
+4. PostgreSQL stores application data according to the configured schema.
+5. Vercel hosts the deployed web application.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js and npm
+- Git
+- A Supabase project for backend features
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Vasanthakumar-27/skillbridge.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd skillbridge
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Configure the environment variables required by the application using the provided `.env.example` or `.env.example` equivalent file. Check the project source code for the exact variable names.
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the local URL displayed in your terminal.
+
+## 🔐 Environment Configuration
+
+Configure your Supabase project URL and publishable/anonymous client key using the environment variable names expected by the application.
+
+- Never commit `.env` files containing secrets.
+- Never expose a Supabase service-role key in frontend code.
+- Use appropriate Supabase Row Level Security (RLS) policies to protect user data.
+
+## 🌍 Deployment
+
+SkillBridge is deployed using Vercel.
+
+To deploy your own instance:
+
+1. Import the GitHub repository into Vercel.
+2. Configure the required environment variables.
+3. Set the appropriate build command and output directory for the project.
+4. Deploy the application.
+5. Test the deployed website and its backend integrations.
+
+## 🔮 Future Enhancements
+
+- Student skill profiles and portfolios.
+- Project search and filtering.
+- Application status tracking.
+- Business and student dashboards.
+- Project progress tracking.
+- Notifications and messaging.
+- Project reviews and feedback.
+- Improved access control and security.
+
+## 🤝 Contributing
+
+Contributions and suggestions are welcome.
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Open a pull request describing your improvements.
+
+## 📄 License
+
+A license has not yet been specified. Add an appropriate open-source license before permitting reuse under specific terms.
+
+---
+
+**SkillBridge — Turning student skills into real-world experience.**
