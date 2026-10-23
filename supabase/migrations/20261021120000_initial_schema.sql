@@ -1,3 +1,7 @@
+-- Run once on a brand-new Supabase project.
+-- For an existing project, skip this file; rerunning it causes
+-- "type user_role already exists" and duplicate-object errors.
+
 create type public.user_role as enum ('student', 'employer');
 create type public.application_status as enum ('submitted', 'shortlisted', 'accepted', 'rejected');
 
@@ -36,16 +40,14 @@ alter table public.profiles enable row level security;
 alter table public.projects enable row level security;
 alter table public.applications enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select on public.projects to anon, authenticated;
+grant select on public.profiles to authenticated;
+grant insert, update on public.projects to authenticated;
+grant select, insert, update on public.applications to authenticated;
+
 create policy "Profiles are visible to authenticated users"
   on public.profiles for select to authenticated using (true);
-
-create policy "Users can create their own profile"
-  on public.profiles for insert to authenticated
-  with check (id = auth.uid());
-
-create policy "Users can update their own profile"
-  on public.profiles for update to authenticated
-  using (id = auth.uid()) with check (id = auth.uid());
 
 create policy "Live projects are visible to authenticated users"
   on public.projects for select to authenticated
@@ -123,6 +125,22 @@ begin
 end;
 $$;
 
+create or replace function public.prevent_application_identity_change()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.project_id <> old.project_id or new.student_id <> old.student_id then
+    raise exception 'Application ownership cannot be changed';
+  end if;
+  return new;
+end;
+$$;
+
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+create trigger applications_identity_guard
+  before update on public.applications
+  for each row execute procedure public.prevent_application_identity_change();
